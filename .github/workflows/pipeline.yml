@@ -1,0 +1,25 @@
+name: pipeline
+on:
+  workflow_dispatch:
+    inputs:
+      user_id:
+        description: 'Telegram ID владельца канала'
+        default: ''
+  schedule:
+    - cron: '0 9 * * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pip install edge-tts requests
+      - run: python pipeline.py
+        env:
+          USER_ID: ${{ github.event.inputs.user_id || secrets.ADMIN_ID }}
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          WORKER_SECRET: ${{ secrets.WORKER_SECRET }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
